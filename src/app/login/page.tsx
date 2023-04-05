@@ -1,7 +1,6 @@
 'use client'
 
-import { useContext, useState } from 'react'
-import { AuthContext } from '~/layout'
+import { useState } from 'react'
 import axios from '~/lib/axios'
 import './page.module.css'
 import { useRouter } from 'next/navigation'
@@ -9,7 +8,6 @@ import { useRouter } from 'next/navigation'
 export default function Login() {
   const router = useRouter()
   const [formData, setFormData] = useState({})
-  const { user, setUser } = useContext(AuthContext)
 
   const handleInputChange = (event: any) => {
     const { name, value } = event.target
@@ -23,12 +21,13 @@ export default function Login() {
       const res = await axios.post('/api/login', formData)
 
       if (res.status === 200) {
-        setUser(res.data)
         localStorage.setItem('auth', JSON.stringify(res.data))
         router.push('/books')
       }
     } catch (err: any) {
       console.log(err)
+      if (err.response.status === 404) console.log('handle user not found')
+      if (err.response.status === 422) console.log('handle bad username or password')
     }
   }
 

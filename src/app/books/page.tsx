@@ -1,36 +1,38 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import axios from '~/lib/axios'
-import { AuthContext } from '~/layout'
 
 export default function Books(props: any) {
   const router = useRouter()
-  const { user, setUser } = useContext(AuthContext)
   const [books, setBooks] = useState([])
 
   useEffect(() => {
     const getData = async () => {
       try {
+        const localUser = localStorage.getItem('auth')
+        let auth
+
+        if (localUser) {
+          auth = JSON.parse(localUser)
+        }
+
+        if (!auth?.token) router.push('/login')
+
         const res = await axios.get('/api/book', {
           headers: {
-            Authorization: 'Bearer ' + user?.token,
+            Authorization: 'Bearer ' + auth?.token,
           },
         })
-
         setBooks(res.data.data)
       } catch (err: any) {
-        if (err.response.status === 401) router.push('/login')
         console.log(err)
+        if (err.response.status === 401) router.push('/login')
       }
     }
-    if (user?.token) {
-      getData()
-    } else {
-      router.push('/login')
-    }
-  }, [user])
+    getData()
+  }, [])
 
   return (
     <ul>
