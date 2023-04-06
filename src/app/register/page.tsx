@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
 import axios from '~/lib/axios'
 
 export default function Register(props: any) {
@@ -9,9 +10,7 @@ export default function Register(props: any) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError] = useState<null|string>(null)
-
-  const router = useRouter()
+  const [error, setError] = useState<null | string>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -19,12 +18,11 @@ export default function Register(props: any) {
     if (password !== '' && confirmPassword !== '') {
       if (password !== confirmPassword) {
         setError('Passwords must be the same.')
+        throw new Error('Passwords must be the same')
       } else {
         setError(null)
       }
     }
-
-    if (error) return
 
     try {
       const res = await axios.post('/api/register', {
@@ -36,16 +34,27 @@ export default function Register(props: any) {
 
       if (res.status === 200) {
         if (res.data.message === 'registered') {
-          // toast success
-        }
-
-        if (res.data.message === 'user_exists') {
-          // toast warning
+          toast('Success! See email for verification link.', {
+            type: 'success',
+            autoClose: 4000,
+          })
+          return
         }
       }
     } catch (err: any) {
-      // toast error
-      console.log(err)
+      if (err.response.status === 422) {
+        toast('User already exists.', {
+          type: 'warning',
+          autoClose: 3000,
+        })
+        return
+      }
+
+      toast('There was an error.', {
+        type: 'error',
+        autoClose: 3000,
+      })
+      return
     }
   }
 
@@ -111,9 +120,7 @@ export default function Register(props: any) {
             name="confirmPassword"
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
-          {error && (
-            <p className="text-red-500 text-sm mt-2">{error}</p>
-          )}
+          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         </div>
         <div className="flex justify-center">
           <button
