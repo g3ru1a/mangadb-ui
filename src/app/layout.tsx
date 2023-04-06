@@ -1,6 +1,7 @@
 'use client'
 
-import { createContext, useEffect, useState } from 'react'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css';
 import './globals.css'
 
 // Causing an error
@@ -14,13 +15,13 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-
   return (
-      <html lang="en">
-        <head>
-          <title>Manga DB</title>
-        </head>
-        <body>{children}</body>
-      </html>
+    <html lang="en">
+      <head>
+        <title>Manga DB</title>
+      </head>
+      <body>{children}</body>
+      <ToastContainer />
+    </html>
   )
 }
