@@ -10,9 +10,6 @@ const inter = Inter({ subsets: ['latin'] })
 export default function Home() {
   return (
     <main className={styles.main}>
-      <Head>
-        <title>Manga DB</title>
-      </Head>
       <div className={styles.description}>
         <p>
           Get started by editing&nbsp;
