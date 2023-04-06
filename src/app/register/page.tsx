@@ -16,7 +16,12 @@ export default function Register(props: any) {
     e.preventDefault()
 
     try {
-      const res = await axios.post('/api/register', { name, email, password })
+      const res = await axios.post('/api/register', {
+        name,
+        email,
+        password,
+        password_confirmation: confirmPassword,
+      })
 
       if (res.status === 200) {
         if (res.data.message === 'registered') {
@@ -70,11 +75,12 @@ export default function Register(props: any) {
           />
         </label>
         <br />
-        <label htmlFor="confirm-password">
+        <label htmlFor="password_confirmation">
           Confirm Password:
           <input
             type="password"
             id="confirm-password"
+            name="password_confirmation"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
