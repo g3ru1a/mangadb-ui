@@ -1,7 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import {  useState } from 'react'
 import { toast } from 'react-toastify'
 import axios from '~/lib/axios'
 
