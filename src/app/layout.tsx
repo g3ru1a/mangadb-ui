@@ -14,19 +14,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  useEffect(() => {
-    const localUser = localStorage.getItem('auth')
-    let auth
-
-    if (localUser) {
-      auth = JSON.parse(localUser)
-    }
-
-    if (auth?.user && auth?.token) {
-    }
-
-    if (auth?.user) return
-  }, [])
 
   return (
       <html lang="en">
