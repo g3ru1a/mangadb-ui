@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import axios from '~/lib/axios'
 import './page.module.css'
 import { useRouter } from 'next/navigation'
@@ -10,6 +10,7 @@ export default function Login() {
   const [formData, setFormData] = useState({})
 
   const handleInputChange = (event: any) => {
+    console.log(formData)
     const { name, value } = event.target
     setFormData({ ...formData, [name]: value })
   }
@@ -50,7 +51,7 @@ export default function Login() {
             className="border border-gray-400 p-2 w-full rounded-md"
             type="email"
             name="email"
-            onChange={(event) => handleInputChange}
+            onChange={(event) => handleInputChange(event)}
           />
         </div>
         <div className="mb-6">
@@ -64,7 +65,7 @@ export default function Login() {
             className="border border-gray-400 p-2 w-full rounded-md"
             type="password"
             name="password"
-            onChange={(event) => handleInputChange}
+            onChange={(event) => handleInputChange(event)}
           />
         </div>
         <div className="flex justify-center">
