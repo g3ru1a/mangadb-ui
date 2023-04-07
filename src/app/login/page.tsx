@@ -10,7 +10,6 @@ export default function Login() {
   const [formData, setFormData] = useState({})
 
   const handleInputChange = (event: any) => {
-    console.log(formData)
     const { name, value } = event.target
     setFormData({ ...formData, [name]: value })
   }
