@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import {  useState } from 'react'
 import axios from '~/lib/axios'
 import './page.module.css'
 import { useRouter } from 'next/navigation'
