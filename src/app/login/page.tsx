@@ -4,6 +4,7 @@ import {  useState } from 'react'
 import axios from '~/lib/axios'
 import './page.module.css'
 import { useRouter } from 'next/navigation'
+import { toast } from 'react-toastify'
 
 export default function Login() {
   const router = useRouter()
@@ -26,9 +27,17 @@ export default function Login() {
       }
     } catch (err: any) {
       console.log(err)
-      if (err.response.status === 404) console.log('handle user not found')
+      if (err.response.status === 404) {
+        toast('User not found.', {
+          type: 'error',
+          autoClose: 3000
+        })
+      }
       if (err.response.status === 422)
-        console.log('handle bad username or password')
+        toast('Incorrect username or password.', {
+          type: 'warning',
+          autoClose: 3000
+        })
     }
   }
 
