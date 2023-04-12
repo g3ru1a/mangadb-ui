@@ -2,7 +2,7 @@
 
 let path = '/api/:path*'
 
-if (!process.env.NEXT_PUBLIC_ENVIRONMENT === 'local') {
+if (process.env.NEXT_PUBLIC_ENVIRONMENT !== 'local') {
   path = '/:path*'
 }
 
