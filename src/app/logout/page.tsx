@@ -2,18 +2,21 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import axios from '~/lib/axios'
+import { getAxiosInstance } from '~/lib/axios'
 
 export default function Logout() {
   const router = useRouter()
 
   useEffect(() => {
-    localStorage.removeItem('auth')
 
     const logout = async () => {
       try {
-        const res = await axios.post('/logout')
-        console.log(res)
+        const axios = getAxiosInstance(true);
+        const res = await axios.post('/logout');
+        console.log(res);
+        if(res.status === 200) {
+          localStorage.removeItem('auth')
+        }
       } catch (err: any) {
         console.log(err)
       }

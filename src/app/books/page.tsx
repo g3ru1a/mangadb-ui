@@ -2,48 +2,43 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import axios from '~/lib/axios'
+import { getAxiosInstance } from '~/lib/axios'
+import {AuthError} from "~/lib/custom_errors";
+import {BookData} from "~/lib/data-types";
 
 export default function Books(props: any) {
-  const router = useRouter()
-  const [books, setBooks] = useState([])
+    const router = useRouter()
+    const [books, setBooks] = useState([])
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const localUser = localStorage.getItem('auth')
-        let auth
+    useEffect(() => {
+        const getData = async () => {
+            try {
+                const axios = getAxiosInstance(true);
+                axios.get("/book").then((res) => {
+                    const books: BookData[] = res.data.data as BookData[];
+                    setBooks(res.data.data);
+                }).catch((err) => {
+                    if(err.response.status === 401) throw new AuthError("Unauthorized");
+                });
+            }catch (err) {
+                if(err instanceof AuthError) {
+                    router.push('/login')
+                }
+            }
+        };
+        getData();
+    }, [])
 
-        if (localUser) {
-          auth = JSON.parse(localUser)
-        }
-
-        if (!auth?.token) router.push('/login')
-
-        const res = await axios.get('/book', {
-          headers: {
-            Authorization: 'Bearer ' + auth?.token,
-          },
-        })
-        setBooks(res.data.data)
-      } catch (err: any) {
-        console.log(err)
-        if (err.response.status === 401) router.push('/login')
-      }
-    }
-    getData()
-  }, [])
-
-  return (
-    <ul>
-      {books &&
-        books.map((book: any) => {
-          return (
-            <li key={book.id}>
-              {book.id}.) {book.name}
-            </li>
-          )
-        })}
-    </ul>
-  )
+    return (
+        <ul>
+            {books &&
+                books.map((book: BookData) => {
+                    return (
+                        <li key={book.id}>
+                            {book.id}.) {book.name}
+                        </li>
+                    )
+                })}
+        </ul>
+    )
 }

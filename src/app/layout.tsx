@@ -3,6 +3,7 @@
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
 import './globals.css'
+import React from "react";
 
 // Causing an error
 // export const metadata = {
@@ -16,12 +17,16 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <head>
-        <title>Manga DB</title>
-      </head>
-      <body>{children}</body>
-      <ToastContainer />
-    </html>
+    <>
+        <html lang="en">
+        <head>
+            <title>Manga DB</title>
+        </head>
+        <body>
+            {children}
+            <ToastContainer />
+        </body>
+        </html>
+    </>
   )
 }
