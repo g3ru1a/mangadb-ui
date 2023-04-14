@@ -19,7 +19,7 @@ export default function Login() {
     event.preventDefault()
 
     try {
-      const res = await axios.post('/api/login', formData)
+      const res = await axios.post('/login', formData)
 
       if (res.status === 200) {
         localStorage.setItem('auth', JSON.stringify(res.data))

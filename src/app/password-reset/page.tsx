@@ -11,7 +11,7 @@ export default function PasswordReset(props: any) {
     e.preventDefault()
 
     try {
-      const res = await axios.post('/api/password/reset', {
+      const res = await axios.post('/password/reset', {
         email,
       })
 

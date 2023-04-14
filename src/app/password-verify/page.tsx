@@ -25,7 +25,7 @@ export default function PasswordVerify(props: any) {
     }
 
     try {
-      const res = await axios.post('/api/password/verify', {
+      const res = await axios.post('/password/verify', {
         payload: params.get('payload'),
         password,
         password_confirmation: confirmPassword,

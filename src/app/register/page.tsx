@@ -24,7 +24,7 @@ export default function Register(props: any) {
     }
 
     try {
-      const res = await axios.post('/api/register', {
+      const res = await axios.post('/register', {
         name,
         email,
         password,

@@ -13,7 +13,7 @@ export default function VerifyEmail(props: any) {
   useEffect(() => {
     const verifyEmail = async (token: string) => {
       try {
-        const res = await axios.post('/api/verify', { payload: token })
+        const res = await axios.post('/verify', { payload: token })
 
         if (res.status === 200) {
           localStorage.setItem('auth', JSON.stringify(res.data))

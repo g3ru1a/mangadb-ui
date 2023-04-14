@@ -20,7 +20,7 @@ export default function Books(props: any) {
 
         if (!auth?.token) router.push('/login')
 
-        const res = await axios.get('/api/book', {
+        const res = await axios.get('/book', {
           headers: {
             Authorization: 'Bearer ' + auth?.token,
           },

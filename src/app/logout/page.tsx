@@ -12,7 +12,7 @@ export default function Logout() {
 
     const logout = async () => {
       try {
-        const res = await axios.post('/api/logout')
+        const res = await axios.post('/logout')
         console.log(res)
       } catch (err: any) {
         console.log(err)
