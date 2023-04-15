@@ -23,7 +23,6 @@ export default function Login() {
       const res = await axios.post('/login', formData)
 
       if (res.status === 200) {
-        console.log(res.data)
         const authData: AuthData = res.data as AuthData;
         localStorage.setItem('auth', JSON.stringify(authData))
         router.push('/books')
