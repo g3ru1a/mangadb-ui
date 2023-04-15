@@ -8,7 +8,7 @@ import {BookData} from "~/lib/data-types";
 
 export default function Books(props: any) {
     const router = useRouter()
-    const [books, setBooks] = useState([])
+    const [books, setBooks] = useState<BookData[]>([])
 
     useEffect(() => {
         const getData = async () => {
@@ -16,7 +16,7 @@ export default function Books(props: any) {
                 const axios = getAxiosInstance(true);
                 axios.get("/book").then((res) => {
                     const books: BookData[] = res.data.data as BookData[];
-                    setBooks(res.data.data);
+                    setBooks(books);
                 }).catch((err) => {
                     if(err.response.status === 401) throw new AuthError("Unauthorized");
                 });
