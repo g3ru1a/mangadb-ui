@@ -1,45 +1,37 @@
 'use client'
 
-import { useState } from 'react'
-import axios from '~/lib/axios'
 import './page.module.css'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-toastify'
-import { AuthData } from '~/lib/auth-types'
+import { API } from "~/lib/mdb-api";
+import { UnprocessableContentError, UserNotFoundError, AlreadyAuthenticatedError } from "mangadb-api";
 
 export default function Login() {
     const router = useRouter()
-    const [formData, setFormData] = useState({})
-
-    const handleInputChange = (event: any) => {
-        const { name, value } = event.target
-        setFormData({ ...formData, [name]: value })
-    }
 
     const handleSubmit = async (event: any) => {
-        event.preventDefault()
-
+        event.preventDefault();
         try {
-            const res = await axios.post('/login', formData)
-
-            if (res.status === 200) {
-                const authData: AuthData = res.data as AuthData
-                localStorage.setItem('auth', JSON.stringify(authData))
-                router.push('/books')
+            const email = event.target.email.value;
+            const password = event.target.password.value;
+            await API.Auth.login(email, password);
+            const url = process.env.NEXT_PUBLIC_POST_AUTH_REDIRECT || "/dashboard";
+            return router.push(url);
+        }catch (err) {
+            if (typeof err !== "object" || err === null) return console.error(err);
+            if (err instanceof AlreadyAuthenticatedError){
+                const url = process.env.NEXT_PUBLIC_POST_AUTH_REDIRECT || "/dashboard";
+                return router.push(url);
             }
-        } catch (err: any) {
-            console.log(err)
-            if (err.response.status === 404) {
-                toast('User not found.', {
-                    type: 'error',
-                    autoClose: 3000,
-                })
-            }
-            if (err.response.status === 422)
-                toast('Incorrect username or password.', {
-                    type: 'warning',
-                    autoClose: 3000,
-                })
+            if (err instanceof UserNotFoundError)
+                return toast("User not found",
+                {type: "error", autoClose: 3000});
+            if (err instanceof UnprocessableContentError)
+                return toast("Incorrect username or password",
+                    {type: "error", autoClose: 3000});
+            console.error(err);
+            return toast("Unexpected Error",
+                {type: "error", autoClose: 3000});
         }
     }
 
@@ -61,7 +53,7 @@ export default function Login() {
                         className="border border-gray-400 p-2 w-full rounded-md"
                         type="email"
                         name="email"
-                        onChange={(event) => handleInputChange(event)}
+                        // onChange={(event) => handleInputChange(event)}
                     />
                 </div>
                 <div className="mb-6">
@@ -75,7 +67,7 @@ export default function Login() {
                         className="border border-gray-400 p-2 w-full rounded-md"
                         type="password"
                         name="password"
-                        onChange={(event) => handleInputChange(event)}
+                        // onChange={(event) => handleInputChange(event)}
                     />
                 </div>
                 <div className="flex justify-center">

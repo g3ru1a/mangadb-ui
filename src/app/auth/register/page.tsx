@@ -1,59 +1,44 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { toast } from 'react-toastify'
-import axios from '~/lib/axios'
+import {API} from "~/lib/mdb-api";
+import {AlreadyAuthenticatedError, UnprocessableContentError} from "mangadb-api";
+import {useRouter} from "next/navigation";
 
 export default function Register(props: any) {
-    const [name, setName] = useState('')
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [confirmPassword, setConfirmPassword] = useState('')
-    const [error, setError] = useState<null | string>(null)
+    const router = useRouter();
+    const [error, setError] = useState<null | string>(null);
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-
-        if (password !== '' && confirmPassword !== '') {
-            if (password !== confirmPassword) {
-                setError('Passwords must be the same.')
-                throw new Error('Passwords must be the same')
-            } else {
-                setError(null)
-            }
-        }
-
+    const handleSubmit = async (event: any) => {
+        event.preventDefault();
         try {
-            const res = await axios.post('/register', {
-                name,
-                email,
-                password,
-                password_confirmation: confirmPassword,
-            })
-
-            if (res.status === 200) {
-                if (res.data.message === 'registered') {
-                    toast('Success! See email for verification link.', {
-                        type: 'success',
-                        autoClose: 4000,
-                    })
-                    return
-                }
+            const name = event.target.name.value;
+            const email = event.target.email.value;
+            const password = event.target.password.value;
+            const confirmPassword = event.target.confirmPassword.value;
+            const success = await API.Auth.register(name, email, password, confirmPassword);
+            if(success) {
+                toast('Success! See email for verification link.', {
+                    type: 'success', autoClose: 4000 });
             }
-        } catch (err: any) {
-            if (err.response.status === 422) {
-                toast('User already exists.', {
-                    type: 'warning',
-                    autoClose: 3000,
-                })
-                return
+        }catch (err) {
+            if (typeof err !== "object" || err === null) return console.error(err);
+            if (err instanceof AlreadyAuthenticatedError){
+                const url = process.env.NEXT_PUBLIC_POST_AUTH_REDIRECT || "/dashboard";
+                return router.push(url);
+            }
+            if (err instanceof UnprocessableContentError){
+                let errorMessage = "Unprocessable Content";
+                if(err.data.message != null) errorMessage = err.data.message;
+                setError(errorMessage)
+                return toast(errorMessage,
+                    {type: "error", autoClose: 3000});
             }
 
-            toast('There was an error.', {
-                type: 'error',
-                autoClose: 3000,
-            })
-            return
+            console.error(err);
+            return toast("Unexpected Error",
+                {type: "error", autoClose: 3000});
         }
     }
 
@@ -75,7 +60,6 @@ export default function Register(props: any) {
                         className="border border-gray-400 p-2 w-full rounded-md"
                         type="text"
                         name="name"
-                        onChange={(e) => setName(e.target.value)}
                     />
                 </div>
                 <div className="mb-4">
@@ -89,7 +73,6 @@ export default function Register(props: any) {
                         className="border border-gray-400 p-2 w-full rounded-md"
                         type="email"
                         name="email"
-                        onChange={(e) => setEmail(e.target.value)}
                     />
                 </div>
                 <div className="mb-6">
@@ -103,7 +86,6 @@ export default function Register(props: any) {
                         className="border border-gray-400 p-2 w-full rounded-md"
                         type="password"
                         name="password"
-                        onChange={(e) => setPassword(e.target.value)}
                     />
                 </div>
                 <div className="mb-6">
@@ -117,7 +99,6 @@ export default function Register(props: any) {
                         className="border border-gray-400 p-2 w-full rounded-md"
                         type="password"
                         name="confirmPassword"
-                        onChange={(e) => setConfirmPassword(e.target.value)}
                     />
                     {error && (
                         <p className="text-red-500 text-sm mt-2">{error}</p>
