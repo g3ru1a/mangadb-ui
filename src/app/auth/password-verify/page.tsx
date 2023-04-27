@@ -3,74 +3,44 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
-import axios from '~/lib/axios'
+import {API} from "~/lib/mdb-api";
+import {UnprocessableContentError, UserNotFoundError} from "mangadb-api";
+import {BadPayloadError} from "mangadb-api";
 
 export default function PasswordVerify(props: any) {
-    const [password, setPassword] = useState('')
-    const [confirmPassword, setConfirmPassword] = useState('')
     const [error, setError] = useState<null | string>(null)
     const [tokenError, setTokenError] = useState<null | string>(null)
     const router = useRouter()
     const params = useSearchParams()
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        if (password !== '' && confirmPassword !== '') {
-            if (password !== confirmPassword) {
-                setError('Passwords must be the same.')
-                throw new Error('Passwords must be the same')
-            } else {
-                setError(null)
-            }
-        }
-
+    const handleSubmit = async (event: any) => {
+        event.preventDefault();
+        const password = event.target.password.value;
+        const password_confirmation = event.target.confirmPassword.value;
+        const payload = params.get('payload')!;
         try {
-            const res = await axios.post('/password/verify', {
-                payload: params.get('payload'),
-                password,
-                password_confirmation: confirmPassword,
-            })
-
-            if (res.status === 200) {
-                if (res.data.message === 'invalid_token') {
-                    toast(
-                        'Invalid Token. Please request another password reset link.',
-                        {
-                            type: 'error',
-                            autoClose: 8000,
-                        }
-                    )
-
-                    setTimeout(() => {
-                        router.push('/password-reset')
-                    }, 8000)
-                }
-                if (res.data.message === 'password_reset') {
-                    toast('Success! Your password has been reset.', {
-                        type: 'success',
-                        autoClose: 4000,
-                    })
-
-                    setTimeout(() => {
-                        router.push('/login')
-                    }, 4000)
-                    return
-                }
+            await API.Auth.verifyPasswordResetToken(payload, password, password_confirmation);
+            toast('Success! Your password has been reset.',
+                { type: 'success', autoClose: 4000 });
+            setTimeout(() => {
+                const url = process.env.NEXT_PUBLIC_POST_AUTH_REDIRECT || "/dashboard";
+                return router.push(url);
+            }, 4000);
+        }catch (err: any) {
+            if (typeof err !== "object" || err === null) return console.error(err);
+            if (err instanceof UnprocessableContentError){
+                let errorMessage = "Unprocessable Content";
+                if(err.data.message != null) errorMessage = err.data.message;
+                setError(errorMessage)
+                return toast(errorMessage,
+                    {type: "error", autoClose: 3000});
             }
-        } catch (err: any) {
-            if (err.response.status === 422) {
-                toast('Token Error.', {
-                    type: 'error',
-                    autoClose: 3000,
-                })
-                return
-            }
-
-            toast('There was an error.', {
-                type: 'error',
-                autoClose: 3000,
-            })
-            return
+            if (err instanceof BadPayloadError)
+                return toast("Bad Token.",
+                    {type: "error", autoClose: 3000});
+            console.error(err);
+            return toast("Unexpected Error",
+                {type: "error", autoClose: 3000});
         }
     }
 
@@ -131,7 +101,6 @@ export default function PasswordVerify(props: any) {
                         className="border border-gray-400 p-2 w-full rounded-md"
                         type="password"
                         name="password"
-                        onChange={(e) => setPassword(e.target.value)}
                     />
                 </div>
                 <div className="mb-6">
@@ -145,7 +114,6 @@ export default function PasswordVerify(props: any) {
                         className="border border-gray-400 p-2 w-full rounded-md"
                         type="password"
                         name="confirmPassword"
-                        onChange={(e) => setConfirmPassword(e.target.value)}
                     />
                     {error && (
                         <p className="text-red-500 text-sm mt-2">{error}</p>

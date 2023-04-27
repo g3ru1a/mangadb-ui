@@ -2,7 +2,9 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import axios from '~/lib/axios'
+import {API} from "~/lib/mdb-api";
+import {toast} from "react-toastify";
+import {BadPayloadError} from "mangadb-api";
 
 export default function VerifyEmail(props: any) {
     const [loading, setLoading] = useState(true)
@@ -11,30 +13,33 @@ export default function VerifyEmail(props: any) {
     const router = useRouter()
 
     useEffect(() => {
+
         const verifyEmail = async (token: string) => {
             try {
-                const res = await axios.post('/verify', { payload: token })
+                await API.Auth.verifyEmail(token);
+                setVerified(true);
+                setLoading(false);
 
-                if (res.status === 200) {
-                    localStorage.setItem('auth', JSON.stringify(res.data))
-                    setVerified(true)
-                    setLoading(false)
-
-                    setTimeout(() => {
-                        router.push('/books')
-                    }, 2000)
-                }
-            } catch (err: any) {
-                console.log(err)
+                setTimeout(() => {
+                    const url = process.env.NEXT_PUBLIC_POST_AUTH_REDIRECT || "/dashboard";
+                    return router.push(url);
+                }, 2000);
+            }catch (err: any) {
+                if (typeof err !== "object" || err === null) return console.error(err);
+                if (err instanceof BadPayloadError)
+                    return toast("No user with that email exists.",
+                        {type: "error", autoClose: 3000});
+                console.error(err);
+                return toast("Unexpected Error",
+                    {type: "error", autoClose: 3000});
             }
         }
 
         const payload = params.get('payload')
-
         if (payload) {
-            verifyEmail(payload)
+            verifyEmail(payload);
         }
-    }, [params])
+    }, [params]);
 
     if (loading) {
         return (

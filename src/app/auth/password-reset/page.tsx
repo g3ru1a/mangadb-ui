@@ -2,49 +2,32 @@
 
 import { useState } from 'react'
 import { toast } from 'react-toastify'
-import axios from '~/lib/axios'
+import {API} from "~/lib/mdb-api";
+import {UnprocessableContentError, UserNotFoundError} from "mangadb-api";
 
 export default function PasswordReset(props: any) {
-    const [email, setEmail] = useState('')
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-
-        try {
-            const res = await axios.post('/password/reset', {
-                email,
-            })
-
-            if (res.status === 200) {
-                if (res.data.message === 'email_sent') {
-                    toast(
-                        'If a user with that email exists, you should recieve a link to reset in your email.',
-                        {
-                            type: 'success',
-                            autoClose: 8000,
-                        }
-                    )
-                    return
-                }
+    const handleSubmit = async (event: any) => {
+        event.preventDefault();
+        const email = event.target.email.value;
+        try{
+            await API.Auth.resetPassword(email);
+            toast('Check your email inbox for a password reset link.',
+                { type: 'success', autoClose: 8000 });
+        }catch (err){
+            if (typeof err !== "object" || err === null) return console.error(err);
+            if (err instanceof UserNotFoundError)
+                return toast("No user with that email exists.",
+                    {type: "error", autoClose: 3000});
+            if (err instanceof UnprocessableContentError){
+                let errorMessage = "Unprocessable Content";
+                if(err.data.message != null) errorMessage = err.data.message;
+                return toast(errorMessage,
+                    {type: "error", autoClose: 3000});
             }
-        } catch (err: any) {
-            console.log(err)
-            if (err.response.status === 422) {
-                toast(
-                    'If a user with that email exists, you should recieve a link to reset in your email.',
-                    {
-                        type: 'success',
-                        autoClose: 8000,
-                    }
-                )
-                return
-            }
-
-            toast('There was an error.', {
-                type: 'error',
-                autoClose: 3000,
-            })
-            return
+            console.error(err);
+            return toast("Unexpected Error",
+                {type: "error", autoClose: 3000});
         }
     }
 
@@ -66,7 +49,6 @@ export default function PasswordReset(props: any) {
                         className="border border-gray-400 p-2 w-full rounded-md"
                         type="email"
                         name="email"
-                        onChange={(e) => setEmail(e.target.value)}
                     />
                 </div>
                 <div className="flex justify-center">
